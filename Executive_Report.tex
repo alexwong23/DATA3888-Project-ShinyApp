@@ -34,7 +34,7 @@
 \leadauthor{460352996 470066919 480145820 480407614}
 
 % Keywords are not mandatory, but authors are strongly encouraged to provide them. If provided, please include two to five keywords, separated by the pipe symbol, e.g:
- \keywords{  Obesity |  Regression |  Correlation |  Prediction  }  
+ \keywords{  Transplant |  Regression |  Prediction |  Immunosuppression  }  
 
 \begin{abstract}
 Kidney failure is the final stage of renal disease and is dangerous for
@@ -75,49 +75,19 @@ accurate allocation of these organs.
 \hypertarget{introduction}{%
 \subsection{Introduction}\label{introduction}}
 
-Excess weight is the new epidemic of the 21st century and has resulted
-in many significant health and economic consequences for the global
-population (Stein and Colditz, 2004). In Australia, the obesity epidemic
-has spread drastically as 1 in 3 adults are classified as overweight or
-obese (Australian Institute of Health and Welfare, 2019). Researches
-have shown that this epidemic is more common in males than females and
-hence, BYU Human Performance Research Centre has collected data from 250
-men of various age and obtained estimates of the percentage of body fat
-through underwater weighing and various body circumference measurements
-(Rahman and Harding, 2013; DASL, n.d.). As body fat percentage is
-difficult to calculate in real life, the value for body fat percentage
-was derived from body density using the Siri's 1956 equation (DASL,
-n.d.).
-
 \hypertarget{objective}{%
 \subsection{Objective}\label{objective}}
 
 Our main objective is to create a risk calculator that can assist
 practitioners in their decision making for patient kidney allocation and
-inform prescriptions for immunosuppressive drugs. Firstly, our
-calculator will utilise patient's genetic expression from RNA-Seq to
-predict the chance of them experiencing T-cell/antibody mediated acute
-rejection, which is a sudden decline in graft function. This can help
-practitioners in deciding whether more aggressive immune suppression
-methods are required to prevent rejection. We will then estimate the
-probability until donor specific antibodies arise for the patient
-phenotype, based upon potential numbers of eplet mismatches they could
-have with donor kidneys. DSA presence has been found to be associated
-with many forms of rejection and graft failure. A way to minimise graft
-dysfunction is for the patient to take immunosuppressive drugs, which as
-a consequence could increase their risk of contracting diseases.
-However, some rare patients are found to be operationally tolerant,
-which means that they still maintain stable graft function after removal
-of these drugs. Hence, our final part will be assessing the patient's
-reliance on immune suppression, which can help with prescription making
-for the practitioner.
+inform prescriptions for immunosuppressive drugs.
 
 \hypertarget{target-audience}{%
 \subsection{Target Audience}\label{target-audience}}
 
 We believe that our product is best suited for clinical settings that
 foster shared decision making between the patient and the nephrologist.
-According to Gordan's 2013 paper , Shared Decision Making promotes
+According to Gordan's 2013 paper, Shared Decision Making promotes
 patient centered care allowing for the integration of the nephrologist's
 expertise on renal allograft dysfunction as well as the patient's values
 and beliefs concerning future treatment. Our tool will provide an
@@ -132,15 +102,21 @@ transplantation.
 \subsubsection{1. Predicting acute
 rejection}\label{predicting-acute-rejection}}
 
+Firstly, our calculator will utilise patient's genetic expression from
+RNA-Seq to predict the chance of them experiencing T-cell/antibody
+mediated acute rejection, which is a sudden decline in graft function.
+This can help practitioners in deciding whether more aggressive immune
+suppression methods are required to prevent rejection.
+
 \hypertarget{data-cleaning-and-processing}{%
 \paragraph{1.1. Data cleaning and
 processing}\label{data-cleaning-and-processing}}
 
-We combined 3 datasets, DASL Dataset (R10-09) \&
-\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{}\textgreater{},
-to build part one of the risk calculator. For two of the them, we
-performed cpm, log2 transformation appropriately and changed ensemble id
-to gene symbols. We joined the three datasets based on common gene
+Acute Rejection (AR) calculator is based on data from GSE120396,
+GSE120649, GSE131179 from Gene Expression Omnibus. We combined the three
+datasets to build part one of the risk calculator. For two of the them,
+we performed cpm, log2 transformation appropriately and changed ensemble
+id to gene symbols. We joined the three datasets based on common gene
 symbols and performed quantile normalisation to reduce batch effect.
 This allowed more robust predictions that can be generalised to
 different sequencing platforms. We performed feature selection based on
@@ -179,19 +155,39 @@ long computational time.
 \subsubsection{2. Estimating Time to de novo DSA
 Presence}\label{estimating-time-to-de-novo-dsa-presence}}
 
+Survival curve (from `Donor Mismatches' tab) is based on data provided
+by Dr.~Germain Wong. Here we use the data provided by dr Germaine wong
+to calculate an estimate predicting the outcome of a graft based on the
+recipient's phenotypic information.
+
+We will then estimate the probability until donor specific antibodies
+arise for the patient phenotype, based upon potential numbers of eplet
+mismatches they could have with donor kidneys. DSA presence has been
+found to be associated with many forms of rejection and graft failure.
+
+Eplets are small arrangements of amino acid residues that are
+polymorphic. That is they occur in several different forms on Human
+Leukocyte antigen (HLA) molecules. Eplets are essential components of
+HLA epitopes (part of an antigen molecule where an antibody attaches
+itself) that are recognised by the antibodies
+
+HLA (Human Leukocyte antigen) are cell surface proteins, responsible for
+regulating the immune system in humans. They are important in graft
+rejection: where any cell displaying some other HLA type is seen as an
+invader by the body's immune system = rejection of the tissue that bears
+those cells.
+
 \hypertarget{data-cleaning-and-processing-1}{%
 \paragraph{2.1. Data cleaning and
 processing}\label{data-cleaning-and-processing-1}}
 
-Here we use the data provided by dr Germaine wong to calculate an
-estimate predicting the outcome of a graft based on the recipient's
-phenotypic information. Based on a study by Dayoub et al.~in 2018 we
-choose age and gender as phenotypic predictors for graft survival. Here
-we first create a survival object using presence or absence of class 2
-de nova DSA's and the number of days for it to form, which is our
-dependent variable for our Kaplan Meier curve. here we focused on DSA as
-its an established biomarker for predicting antibody-mediated rejection
-which in turn is the leading cause of graft loss
+Based on a study by Dayoub et al.~in 2018 we choose age and gender as
+phenotypic predictors for graft survival. Here we first create a
+survival object using presence or absence of class 2 de nova DSA's and
+the number of days for it to form, which is our dependent variable for
+our Kaplan Meier curve. here we focused on DSA as its an established
+biomarker for predicting antibody-mediated rejection which in turn is
+the leading cause of graft loss
 
 \hypertarget{output-1}{%
 \paragraph{2.2. Output}\label{output-1}}
@@ -218,6 +214,14 @@ subpopulation fairly, meaning that some curves are uninformative.
 \hypertarget{predicting-operational-tolerance}{%
 \subsubsection{3. Predicting Operational
 Tolerance}\label{predicting-operational-tolerance}}
+
+A way to minimise graft dysfunction is for the patient to take
+immunosuppressive drugs, which as a consequence could increase their
+risk of contracting diseases. However, some rare patients are found to
+be operationally tolerant, which means that they still maintain stable
+graft function after removal of these drugs. Hence, our final part will
+be assessing the patient's reliance on immune suppression, which can
+help with prescription making for the practitioner.
 
 \hypertarget{data-cleaning-and-processing-2}{%
 \paragraph{3.1. Data cleaning and
@@ -341,10 +345,14 @@ Appearance
 
 Penalised Logistic Regression: Risk of Acute Rejection
 
+\begin{center}\includegraphics{Executive_Report_files/figure-latex/AR-1} \end{center}
+
 \hypertarget{appendix-c}{%
 \subsubsection{Appendix C}\label{appendix-c}}
 
 Penalised Logistic Regression: Reliance on Immunosuppression
+
+\begin{center}\includegraphics{Executive_Report_files/figure-latex/immuno-1} \end{center}
 
 %\showmatmethods
 
