@@ -212,7 +212,6 @@ server <- function(input, output) {
 
     return(legend_title)
   })
-
   
   ar_prediction = eventReactive(input$Button,{
     
@@ -378,9 +377,6 @@ server <- function(input, output) {
     
   })
   
-  
-  
-  
   output$SurvPlot = renderPlot({
 
     ggsurv <- ggsurvplot(
@@ -417,7 +413,6 @@ server <- function(input, output) {
 
     ggsurv
   }, height = 600)
-  
   
   output$ARPlot = renderPlot({
     
@@ -484,7 +479,5 @@ server <- function(input, output) {
       theme(plot.title = element_text(hjust = 0.5, colour = "dark blue")
       )
   })
-
-
 }
 shinyApp(ui = ui, server = server)

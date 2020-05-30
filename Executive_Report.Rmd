@@ -1,0 +1,465 @@
+---
+title: Creating a Kidney Transplant Risk Calculator using GEO datasets (Group 24)
+
+author:
+  - name: 460352996 470066919 480145820 480407614
+
+address:
+  - address: GitHub code repository is [here](https://github.sydney.edu.au/aauw2900/DATA3888FinalProject)
+
+
+lead_author_surname: 460352996 470066919 480145820 480407614
+
+
+abstract: |
+  Kidney failure is the final stage of renal disease and is dangerous for the body as the excretory system fails to function properly. Therefore medical intervention in the form of renal dialysis or organ transplantation is required.
+  Organ transplantation is a lifesaving treatment for those people diagnosed with Kidney disease and is greatly preferred over renal dialysis. It has the potential to offer a better quality of life for the patient - fewer health problems and reduced restrictions on diet- to name a few benefits.
+  Despite the benefits, organ allocation has posed itself as a major resource balance problem. This shortage in donor kidneys results in the need for a careful assessment in allocating organs to patients that potentiate in maximal survival time.
+  We propose a tool that can aid in the effective and accurate allocation of these organs.
+
+
+# Optional: One or more keywords
+keywords:
+  - Obesity
+  - Regression
+  - Correlation
+  - Prediction
+
+# Paper size for the document, values of letter and a4
+papersize: a4
+
+# Font size of the document, values of 9pt (default), 10pt, 11pt and 12pt
+fontsize: 9pt
+
+skip_final_break: true
+
+# Optional: Bibliography 
+bibliography: pinp
+
+footer_contents: "A Research on Kidney Transplant"
+
+# Produce a pinp document
+output: pinp::pinp
+
+vignette: >
+  %\VignetteIndexEntry{YourPackage-vignetteentry}
+  %\VignetteKeywords{YourPackage, r, anotherkeyword}
+  %\VignettePackage{YourPackage}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r load_packages, include=TRUE, echo=FALSE,message=FALSE, warning=FALSE}
+library(tidyverse)
+library(knitr)
+library(janitor)
+library("readxl")
+library(ggfortify)
+library(GGally)
+library(qtlcharts)
+library(leaps)
+library(sjPlot)
+library(partykit)
+library(rpart)
+library(caret)
+library(pinp)
+library(tinytex)
+```
+
+```{r app_setup, include=TRUE, echo=FALSE,message=FALSE, warning=FALSE}
+library(GEOquery)
+library(R.utils)
+library(reshape2)
+library(ggplot2)
+library(limma)
+library(biomaRt)
+library(ggbiplot)
+library(factoextra)
+library(caret)
+library(glmnet)
+library(DESeq2)
+library(edgeR)
+library(DEFormats)
+library(ROCR)
+library(pROC)
+library(doParallel)
+library(foreach)
+library(DescTools)
+library(ggthemes)
+library(class)
+library(rsconnect)
+library(BiocManager)
+library(affy)
+library(oligo)
+# library(pd.mogene.2.0.st)
+# library(mogene20sttranscriptcluster.db)
+library(stringr)
+# library(dashboardthemes)
+library(survminer)
+library(survival)
+library(survMisc)
+library(EnsDb.Hsapiens.v79)
+options(repos = BiocManager::repositories())
+```
+
+## Introduction
+
+Excess weight is the new epidemic of the 21st century and has resulted in many significant health and economic consequences for the global population (Stein and Colditz, 2004). In Australia, the obesity epidemic has spread drastically as 1 in 3 adults are classified as overweight or obese (Australian Institute of Health and Welfare, 2019). Researches have shown that this epidemic is more common in males than females and hence, BYU Human Performance Research Centre has collected data from 250 men of various age and obtained estimates of the percentage of body fat through underwater weighing and various body circumference measurements (Rahman and Harding, 2013; DASL, n.d.). As body fat percentage is difficult to calculate in real life, the value for body fat percentage was derived from body density using the Siri’s 1956 equation (DASL, n.d.).
+
+## Objective
+Our main objective is to create a risk calculator that can assist practitioners in their decision making for patient kidney allocation and inform prescriptions for immunosuppressive drugs. 
+Firstly, our calculator will utilise patient’s genetic expression from RNA-Seq to predict the chance of them experiencing T-cell/antibody mediated acute rejection, which is a sudden decline in graft function. This can help practitioners in deciding whether more aggressive immune suppression methods are required to prevent rejection.
+We will then estimate the probability until donor specific antibodies arise for the patient phenotype, based upon potential numbers of eplet mismatches they could have with donor kidneys. DSA presence has been found to be associated with many forms of rejection and graft failure.
+A way to minimise graft dysfunction is for the patient to take immunosuppressive drugs, which as a consequence could increase their risk of contracting diseases. However, some rare patients are found to be operationally tolerant, which means that they still maintain stable graft function after removal of these drugs. Hence, our final part will be assessing the patient’s reliance on immune suppression, which can help with prescription making for the practitioner.
+
+## Target Audience
+We believe that our product is best suited for clinical settings that foster shared decision making between the patient and the nephrologist. According to Gordan’s 2013 paper , Shared Decision Making promotes patient centered care allowing for the integration of the nephrologist’s expertise on renal allograft dysfunction as well as the patient’s values and beliefs concerning future treatment. Our tool will provide an opportunity for discussion between the patient and practitioner that concerns the nature of treatment pre, during and post organ transplantation.
+
+## Risk Calculator
+
+### 1. Predicting acute rejection
+
+#### 1.1. Data cleaning and processing
+We combined 3 datasets, DASL Dataset (R10-09) & >>>>>>>, to build part one of the risk calculator. For two of the them, we performed cpm, log2 transformation appropriately and changed ensemble id to gene symbols.
+We joined the three datasets based on common gene symbols and performed quantile normalisation to reduce batch effect. This allowed more robust predictions that can be generalised to different sequencing platforms.
+We performed feature selection based on differentially expressed genes between stable and  acute rejection patients, using the limma function. The top 100 most significant genes were selected for a more comprehensive model.
+
+#### 1.2. Selecting a Model
+For model selection, penalised logistic regression models were selected as they allow output of a specific risk rather than a binary outcome, and it reduces issues associated with overfitting, thus solving the large p small n problem. Between ridge, lasso and elastic net , elastic net was selected as it shows the highest accuracy, a stable AUC, and small Brier score using cross validation.
+
+#### 1.3. Output
+In our product, the input raw counts will be transformed. If the data uses ENSEMBL ID, we converted them to official gene symbols. The output will be a colour coded gauge plot showing both percentage of the patient's risk and percentage of the population risk of acute rejection. This visualisation is clear and easy to understand which is suitable for our target audience.
+
+#### 1.4. Limitations
+If the input doesn't include the same genes in the model, a new model will be trained on the spot. However this creates a limitation of the long computational time.
+
+### 2. Estimating Time to de novo DSA Presence
+
+#### 2.1. Data cleaning and processing
+Here we use the data provided by dr Germaine wong to calculate an estimate predicting the outcome of a graft based on the recipient's phenotypic information.
+Based on a study by Dayoub et al. in  2018 we choose age and gender as phenotypic predictors for graft survival.
+Here we first create a survival object using presence or absence of class 2 de nova DSA’s and the number of days for it to form, which is our dependent variable for our Kaplan Meier curve.
+here we focused on DSA as its an established biomarker for predicting antibody-mediated rejection which in turn is the leading cause of graft loss
+
+#### 2.2. Output
+The output is a plot estimating the survival probability of a graft based on the patient's age and gender. As the patient would not know the proportion of mismatches he/she would have with a particular donor we stratified the mismatches based on the mean number of mismatches in the provided data which was 30.
+This gives the practitioner and the patient a better idea of what to expect based on what the previous patient with similar characteristics experienced. Ideally, this can be used in resource allocation and prescribing medication.
+Just to highlight, this is not used as a predictor of graft survival but only a guide.
+
+#### 2.3. Limitations
+The main issue was the size of the data set is small. (only 198 entries). So when we stratify it further based on age, gender, and mismatches we end up with little information for each subgroup. therefore we don't have enough data to represent the entire subpopulation fairly, meaning that some curves are uninformative.
+
+### 3. Predicting Operational Tolerance
+
+#### 3.1. Data cleaning and processing
+To predict operational tolerance, we collected a dataset that contained raw gene expressions from tolerant patients, and normal patients which still required immune suppression for graft function. After quantile normalisation and batch effect removal, we performed feature selection.
+Firstly, genes with noticeable counts in at least one groups was retained by using the edgeR package. We then selected the most differentially expressed genes between the two groups using multiple t-tests. Finally, a review by Massart et al. (2017) suggested a collection of genes that were highly differential between tolerant and normal patients, and so these were also added to our final training dataset.
+
+#### 3.2. Selecting a Model
+Similar to part 1, we performed penalised logistic regression models to account for possible overfitting in a large p small n situation. Elastic net once again proved to be a better model than Ridge and LASSO, showing higher accuracies and AUC after repeated cross-validation.
+
+#### 3.3. Output
+The output is a simple colour coded gauge plot showing both percentage of the patient's reliance and percentage of the population requiring immunosuppression, making it suitable for our target audience.
+
+#### 3.4. Limitations
+However, since operational tolerance is rare, only a handful of data samples are available, making it difficult to diagnose. Also, like Part 1, another limitation of the model is it has to be ‘retrained’ for if the input does not contain the same genes in the model.
+
+## Conclusion
+In conclusion, using the Shared decision-making approach for our risk calculator, we hope both the practitioner and patient are able to make informed decisions and derive the optimal treatment option. This includes allocating reliable donor kidneys to the patient and prescribing the correct dosage of immunosuppressive drugs.
+In terms of future work, we need more diverse and larger datasets to account for variation and possible confounders within the population, and also increase confidence. For example, the eplet data is made up of mostly Caucasian patients only. Ultimately, shared decision making should be implemented more widely within organ transplantation.
+
+
+\newpage
+## Reference List
+
+### 1.
+Dayoub, J.C. Cortese, F., Anzic, A, 2018, The Effects of Donor Age on Organ transplants: a review and implications for aging research, Experimental Gerontology, Vol 110, pp. 230-240,  Retrieved from <> 
+
+### 2.
+Dorr, C. R., Oetting, W. S., Jacobson, P. A., & Israni, A. K. (2018). Genetics of acute rejection after kidney transplantation. Transplant International, 31(3), 263-277.
+
+### 3.
+Edgar R., Domrachev M., Lash AE. (2002). Gene Expression Omnibus: NCBI gene expression and hybridization array data repository. Nucleic Acids Res, 30(1),207-10.
+
+### 4.
+Gordon, E.J., 2013, Opportunities for Shared Decision Making in Kidney Transplantation, American Journal of Transplantation, Vol.13, no.5 pp. 1149-1158.
+
+### 5.
+Kleinbaum, D.G., 2005 Klein, M., ‘Introduction to Survival Analaysis’ in Survival Analysis: A self learning text, Springer, New York, NY pp.1-43.
+
+### 6.
+Massart, A., Ghisdal, L., Abramowicz, M., & Abramowicz, D. (2017). Operational tolerance in kidney transplantation and associated biomarkers. Clinical & Experimental Immunology, 189(2), 138-157.
+
+### 7.
+Tambur, A.R. 2018, HLA-epitope Matching or Eplet Risk Stratification: The Devil is in the Details, Front Immunol, Vol.9
+
+## Appendixes
+
+### Appendix A
+Kaplan-Meier curve: Estimated Probability for Class II de novo DSA Appearance
+
+```{r eplet,echo=F,message=F,warning=F,fig.height=5}
+gender_input = "Male"
+age_input = "36 - 45"
+
+survdt_m = readRDS("survdt_m.rds")
+
+load("elastic.glm.v4.Rdata")
+load("backup_model_v2.Rdata")
+load("100_genes.rdata")
+
+immune_elastic = readRDS("elastic_model_immune.RDS")
+train_immune = readRDS("immune_gene_final_edit.RDS")
+immune_status = readRDS("immune_status.rds")
+edited_immune_elastic = readRDS("edited_elastic_model_immune.RDS")
+
+
+user_survdt = survdt_m %>% dplyr::filter(
+  Gender == gender_input,
+  Age == age_input
+)
+
+user_kmcurve <- survfit(Surv(C2daystodnDSA, C2dnDSA) ~ Eplet2MM, data = user_survdt)
+
+legend_title <- function(gender_input, age_input) {
+  legend_title = paste(gender_input, ":", age_input, "y.o.")
+  return(legend_title)
+}
+
+ggsurv <- ggsurvplot(
+  user_kmcurve, # survfit object with calculated statistics.
+  pval = TRUE,             # show p-value of log-rank test.
+  palette = c("#E7B800", "#2E9FDF"),
+  caption = "Data Provided by Dr. Germain Wong (University of Sydney) \n DSA = Donor Specific Antibody \n Mm = Mismatches",
+  ggtheme = theme_bw(), # customize plot and risk table with a theme.
+  surv.median.line = "hv",  # add the median survival pointer.
+  xlab = "Time (Years)",
+  ylab = "Estimated Probability",
+  subtitle = legend_title(gender_input, age_input),
+  title = "Estimated Probability for Class II de novo DSA Appearance",
+  font.title = c(8, "bold", "darkblue"),
+  font.x = c(7, "bold", "red"),
+  font.y = c(7, "bold", "darkred"),
+  font.tickslab = c(7, "bold"),
+  font.subtitle = c(8, "bold"),
+  legend = "top",
+  legend.title = "Donor Mm",
+  legend.labs = c("< 30 Mm", "> 30 Mm"),
+  risk.table = TRUE,       # show risk table.
+  risk.table.y.text.col = T,# colour risk table text annotations.
+  risk.table.height = 0.25, # the height of the risk table
+  risk.table.y.text = FALSE # show bars instead of names in text annotations in legend of risk table.
+)
+
+ggsurv$plot = ggsurv$plot +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.subtitle = element_text(hjust = 0.5))
+ggsurv
+```
+
+### Appendix B
+Penalised Logistic Regression: Risk of Acute Rejection
+
+```{r AR,eval=F,echo=F,message=F,warning=F,fig.height=3}
+mean_train<- mean(train_data_100)
+inFile <- "./Patient_Data/GSM3406956_s2.txt"
+
+#read.csv(inFile$datapath, header = input$header)
+file<- read.delim(inFile, header = TRUE)
+
+genes <- as.matrix(file[,1])
+gse<- as.numeric(file[,-1])
+gse<- data.matrix(gse)
+rownames(gse) <- genes
+counts <- gse
+
+#getting the processed counts matrix
+cpm_counts <- cpm(counts)
+lcpm <- log2(cpm_counts+1)
+data_counts<- normalizeQuantiles((lcpm))
+
+#checks if ensemble id needs to be transformed
+
+if (startsWith(genes[2], "E")){
+  rownames(data_counts) = sapply(strsplit(rownames(data_counts), ".", fixed=T), function(x) x[1])
+  symbols <- select(EnsDb.Hsapiens.v79, key= as.character(rownames(data_counts)), columns=c("SYMBOL"), keytype="GENEID")
+  df.gse<- as.data.frame(data_counts)
+  gse <- merge(df.gse, symbols, by.x = 0, by.y = 'GENEID', all.x = TRUE)
+  gene_symbols<- gse[,3]
+  data_counts <- as.matrix(gse[,2])
+  rownames(data_counts) <- gene_symbols
+}
+
+chooseGenes <- which(!duplicated(rownames(data_counts)))
+gse<- data.matrix(data_counts[chooseGenes,])
+
+ind <- which(rownames(gse) %in% as.array(sig_genes_100))
+norm_factor <- mean_train/ mean(gse[ind,]) 
+df <- as.matrix(gse[ind,] * norm_factor)
+df2 <- df[order(rownames(df)), ]
+X = (t(df2))
+
+#us existing models
+if (length(ind)==100){
+  predd_ar <- predict(elastic.glm, X, type="response")
+}
+
+#train another model
+if (length(ind) != 100){
+  genes_present <- rownames(as.matrix(gse[ind,]))
+  ind <- which(rownames(train_data_100) %in% genes_present)
+  train = as.matrix(t(train_data_100[ind,]))
+  y <- ifelse(rejection_status_396_179_649=="Yes", 1,0)
+  data <- data.frame(y,train)
+  risk = c()
+  for (i in 1:5){
+    train_cont <- trainControl(method = "repeatedcv", number = 10, repeats = 5, search = "random", verboseIter = FALSE, returnData = FALSE)
+
+    elastic_reg <- train( y~., data = data, method = "glmnet",
+                          preProcess = c("center", "scale"),
+                          tuneLength = 5,
+                          trControl = train_cont
+    )
+    elastic.glm2 <- glmnet(train, y, alpha = elastic_reg$bestTune[1,1], lambda =elastic_reg$bestTune[1,2]	,  family = "binomial")
+    
+    predd_ar <- predict(elastic.glm2, X, type="response")
+    risk[i] = predd_ar
+  }
+  predd_ar <- mean(risk)
+}
+
+df <- data.frame(matrix(nrow=2, ncol = 2))
+names(df) <- c("variable", "percentage")
+df$variable <- c("pop_risk", "pred_risk")
+df$percentage <- c(0.38, predd_ar)
+
+df <- df %>% mutate(group=ifelse(percentage <0.28, "green",
+                               ifelse(percentage>=0.28 & percentage<0.48, "orange","red")),
+                  label=paste0(round(percentage*100), "%"),
+                  title=dplyr::recode(variable, `pop_risk`="Population Risk of Acute Rejection",
+                                      `pred_risk`="Patient's Risk of Acute Rejection",
+                  ))
+ggplot(df, aes(fill = group, ymax = percentage, ymin = 0, xmax = 2, xmin = 1)) +
+geom_rect(aes(ymax=1, ymin=0, xmax=2, xmin=1), fill ="#ece8bd") +
+geom_rect() + 
+coord_polar(theta = "y",start=-pi/2) + xlim(c(0, 2)) + ylim(c(0,2)) +
+geom_text(aes(x = 0, y = 0, label = label, colour=group), size=4.0) +
+geom_text(aes(x=0.8, y=1.45, label=title), size=2.0) + 
+facet_wrap(~title, ncol = 5) +
+theme_void() +
+scale_fill_manual(values = c("red"="#C9146C", "orange"="#DA9112", "green"="#129188")) +
+scale_colour_manual(values = c("red"="#C9146C", "orange"="#DA9112", "green"="#129188")) +
+theme(strip.background = element_blank(),
+      strip.text.x = element_blank()) +
+guides(fill=FALSE) +
+guides(colour=FALSE)+
+ggtitle("Risk of Acute Rejection")+
+theme(plot.title = element_text(size=12, face="bold"))+
+theme(plot.title = element_text(hjust = 0.5, colour = "dark blue"))
+```
+
+### Appendix C 
+Penalised Logistic Regression: Reliance on Immunosuppression
+
+```{r immuno,eval=F,echo=F,message=F,warning=F,fig.height=3}
+mean_train<- mean(as.matrix(train_immune))
+inFile <- "./Patient_Data/GSM3406956_s2.txt"
+file<- read.delim(inFile, header = TRUE)
+
+genes <- as.matrix(file[,1])
+gse<- as.numeric(file[,-1])
+gse<- data.matrix(gse)
+rownames(gse) <- genes
+counts <- gse
+
+#getting the processed counts matrix
+#cpm_counts <- cpm(counts)
+#lcpm <- log2(cpm_counts+1)
+#data_counts<- normalizeQuantiles((lcpm))
+
+data_counts <- counts
+
+
+#checks if ensemble id needs to be transformed
+
+if (startsWith(genes[2], "E")){
+  rownames(data_counts) = sapply(strsplit(rownames(data_counts), ".", fixed=T), function(x) x[1])
+  symbols <- select(EnsDb.Hsapiens.v79, key= as.character(rownames(data_counts)), columns=c("SYMBOL"), keytype="GENEID")
+  df.gse<- as.data.frame(data_counts)
+  gse <- merge(df.gse, symbols, by.x = 0, by.y = 'GENEID', all.x = TRUE)
+  gene_symbols<- gse[,3]
+  data_counts <- as.matrix(gse[,2])
+  rownames(data_counts) <- gene_symbols
+}
+
+chooseGenes <- which(!duplicated(rownames(data_counts)))
+gse<- data.matrix(data_counts[chooseGenes,])
+
+ind <- which(rownames(gse) %in% as.array(rownames(train_immune)))
+norm_factor <- mean_train/ mean(gse[ind,]) 
+df <- as.matrix(gse[ind,] * norm_factor)
+df2 <- df[order(rownames(df)), ]
+X = (t(df2))
+
+#us existing models
+if (length(ind)==nrow(train_immune)){
+  predd_im <- predict(immune_elastic, X, type="response")
+}
+
+
+#train another model
+if (length(ind) != nrow(train_immune)){
+  genes_present <- rownames(as.matrix(gse[ind,]))
+  ind <- which(rownames(train_immune) %in% genes_present)
+  train = as.matrix(t(train_immune[ind,]))
+  y <- ifelse(immune_status=="Immunotherapy", 0,1)
+  data <- data.frame(y,train)
+  risk = c()
+  for (i in 1:5){
+    
+    train_cont <- trainControl(method = "repeatedcv", number = 10, repeats = 5, search = "random", verboseIter = FALSE, returnData = FALSE)
+    
+    elastic_reg <- train( y~., data = data, method = "glmnet",
+                          preProcess = c("center", "scale"),
+                          tuneLength = 5,
+                          trControl = train_cont
+    )
+    elastic.glm2 <- glmnet(train, y, alpha = elastic_reg$bestTune[1,1], lambda =elastic_reg$bestTune[1,2]	,  family = "binomial")
+    
+    predd_im <- predict(elastic.glm2, X, type="response")
+    risk[i] = predd_im
+    
+  }
+  
+  predd_im <- mean(risk)
+}
+
+df <- data.frame(matrix(nrow=2, ncol = 2))
+names(df) <- c("variable", "percentage")
+df$variable <- c("pop_risk", "pred_risk")
+df$percentage <- c(0.85, predd_im)
+
+df <- df %>% mutate(group=ifelse(percentage <0.20, "green",
+                               ifelse(percentage>=0.20 & percentage<0.70, "orange","red")),
+                  label=paste0(round(percentage*100), "%"),
+                  title=dplyr::recode(variable, `pop_risk`="Percentage of Population Relying on IS",
+                                      `pred_risk`="Patient's Predicted Reliance on IS",
+                  ))
+
+ggplot(df, aes(fill = group, ymax = percentage, ymin = 0, xmax = 2, xmin = 1)) +
+geom_rect(aes(ymax=1, ymin=0, xmax=2, xmin=1), fill ="#ece8bd") +
+geom_rect() + 
+coord_polar(theta = "y",start=-pi/2) + xlim(c(0, 2)) + ylim(c(0,2)) +
+geom_text(aes(x=0, y=0, label=label, colour=group), size=4.0) +
+geom_text(aes(x=0.8, y=1.45, label=title), size=2.0) + 
+facet_wrap(~title, ncol = 5) +
+theme_void() +
+scale_fill_manual(values = c("red"="#C9146C", "orange"="#DA9112", "green"="#129188")) +
+scale_colour_manual(values = c("red"="#C9146C", "orange"="#DA9112", "green"="#129188")) +
+theme(strip.background = element_blank(),
+      strip.text.x = element_blank()) +
+guides(fill=FALSE) +
+guides(colour=FALSE)+
+ggtitle("Reliance on Immunosuppression (IS)")+
+theme(plot.title = element_text(size=12, face="bold"))+
+theme(plot.title = element_text(hjust = 0.5, colour = "dark blue"))
+```
