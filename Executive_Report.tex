@@ -37,19 +37,25 @@
  \keywords{  Transplant |  Regression |  Prediction |  Immunosuppression  }  
 
 \begin{abstract}
-Kidney failure is the final stage of renal disease and is dangerous for
-the body as the excretory system fails to function properly. Therefore
-medical intervention in the form of renal dialysis or organ
-transplantation is required. Organ transplantation is a lifesaving
-treatment for those people diagnosed with Kidney disease and is greatly
-preferred over renal dialysis. It has the potential to offer a better
-quality of life for the patient - fewer health problems and reduced
-restrictions on diet- to name a few benefits. Despite the benefits,
-organ allocation has posed itself as a major resource balance problem.
-This shortage in donor kidneys results in the need for a careful
-assessment in allocating organs to patients that potentiate in maximal
-survival time. We propose a tool that can aid in the effective and
-accurate allocation of these organs.
+Background- Kidney failure is the final stage of renal disease and poses
+a major threat to the body as the excretory system fails to function
+properly. To combat kidney failure patients can choose two forms of
+treatment in terms of medical intervention; renal dialysis or organ
+transplantation. Renal dialysis is used to provide some kidney
+functionalities by removing waste, maintaining a safe balance of
+potassium, sodium and bicarbonate levels in the body and helps regulate
+blood pressure (kidney dialysis). However, renal dialysis places several
+restrictions on the patient, compromising their quality of life and is
+not the ideal choice for patients with end stage kidney disease.
+Alternatively, organ transplantation is a life saving treatment and is
+greatly preferred over renal dialysis as it has the potential to offer a
+better quality of life for the patient posing less restrictions on diet,
+working lifestyle and posing fewer long term health problems. While
+organ transplantation greatly preferred, kidney organ allocation has
+posed itself as a major resource allocation problem. Donors and patients
+need to be matched effectively and accurately to each other to not only
+preserve the life of the patient but also, maximise functionality of
+these limited kidney organs.
 \end{abstract}
 
 \dates{This version was compiled on \today} 
@@ -72,209 +78,343 @@ accurate allocation of these organs.
 % If your first paragraph (i.e. with the \dropcap) contains a list environment (quote, quotation, theorem, definition, enumerate, itemize...), the line after the list may have some extra indentation. If this is the case, add \parshape=0 to the end of the list environment.
 
 
-\hypertarget{introduction}{%
-\subsection{Introduction}\label{introduction}}
+\hypertarget{aim-and-background}{%
+\subsection{Aim and background}\label{aim-and-background}}
 
-\hypertarget{objective}{%
-\subsection{Objective}\label{objective}}
+\hypertarget{aim-of-the-project}{%
+\subsubsection{Aim of the project}\label{aim-of-the-project}}
 
-Our main objective is to create a risk calculator that can assist
-practitioners in their decision making for patient kidney allocation and
-inform prescriptions for immunosuppressive drugs.
+With this problem in mind we developed a tool to aid in the effective
+and accurate allocation of donor organs to their respective patients.
+The developed risk calculator will assist practitioners in their
+decision making and shall even inform the prescriptions for
+immunosuppressive drugs. The risk calculator was developed with the
+intention that it would be used in a clinical setting where shared
+decision making is implemented. According to Gordan (2013), shared
+decision making promotes patient centered care. It permits the
+integration of the nephrologist's expertise on renal allograft
+dysfunction with the patient's values and beliefs concerning future
+treatment. Within this clinical setting, our hope would be that the risk
+calculator provides an opportunity of discussion that concerns the
+nature of treatment prior to, during and post organ transplantation.
+
+\hypertarget{multidisciplinary-context}{%
+\subsubsection{Multidisciplinary
+context}\label{multidisciplinary-context}}
+
+Changes being made\ldots{}\ldots{}
 
 \hypertarget{target-audience}{%
-\subsection{Target Audience}\label{target-audience}}
+\subsubsection{Target Audience}\label{target-audience}}
 
-We believe that our product is best suited for clinical settings that
-foster shared decision making between the patient and the nephrologist.
-According to Gordan's 2013 paper, Shared Decision Making promotes
-patient centered care allowing for the integration of the nephrologist's
-expertise on renal allograft dysfunction as well as the patient's values
-and beliefs concerning future treatment. Our tool will provide an
-opportunity for discussion between the patient and practitioner that
-concerns the nature of treatment pre, during and post organ
-transplantation.
+Should we have this here??????
 
-\hypertarget{risk-calculator}{%
-\subsection{Risk Calculator}\label{risk-calculator}}
+\hypertarget{methods}{%
+\subsection{Methods}\label{methods}}
 
-\hypertarget{predicting-acute-rejection}{%
-\subsubsection{1. Predicting acute
-rejection}\label{predicting-acute-rejection}}
+\hypertarget{data-collection-and-developed-models}{%
+\subsubsection{Data collection and developed
+models}\label{data-collection-and-developed-models}}
 
-Firstly, our calculator will utilise patient's genetic expression from
-RNA-Seq to predict the chance of them experiencing T-cell/antibody
-mediated acute rejection, which is a sudden decline in graft function.
-This can help practitioners in deciding whether more aggressive immune
-suppression methods are required to prevent rejection.
+\hypertarget{part-1.-predicting-acute-rejection}{%
+\paragraph{Part 1. Predicting acute
+rejection}\label{part-1.-predicting-acute-rejection}}
 
-\hypertarget{data-cleaning-and-processing}{%
-\paragraph{1.1. Data cleaning and
-processing}\label{data-cleaning-and-processing}}
+Acute Rejection (AR) calculator is based on data taken from the Gene
+Expression Omnibus, GSE120396, GSE120649 and GSE131179. We merged the
+three datasets together in order to achieve a larger sample size for
+better accuracy, to identify outliers and provide a smaller margin of
+error. However, because of the differences between datasets, such as
+number of genes, scale (counts per million) and the use of ensembl ids
+rather than gene ids, we have to perform some preprocessing before they
+can be merged.
 
-Acute Rejection (AR) calculator is based on data from GSE120396,
-GSE120649, GSE131179 from Gene Expression Omnibus. We combined the three
-datasets to build part one of the risk calculator. For two of the them,
-we performed cpm, log2 transformation appropriately and changed ensemble
-id to gene symbols. We joined the three datasets based on common gene
-symbols and performed quantile normalisation to reduce batch effect.
-This allowed more robust predictions that can be generalised to
-different sequencing platforms. We performed feature selection based on
-differentially expressed genes between stable and acute rejection
-patients, using the limma function. The top 100 most significant genes
-were selected for a more comprehensive model.
+Inside the GSE120396, GSE120649 and GSE131179 folders are 88, 16 and 34
+zipped files with file extension txt.gz respectively. Each of these
+files has the gene expression count for one patient. They are unzipped
+and placed together into a table format.
 
-\hypertarget{selecting-a-model}{%
-\paragraph{1.2. Selecting a Model}\label{selecting-a-model}}
+To resolve the issue of different units of measurements, we perform data
+standardization. In particular, cpm and log2 transformation were
+performed on GSE120649 and GSE131179. The ensemble id in GSE120649 and
+GSE131179 were converted to gene symbols using the `EnsDb.Hsapiens.v79'
+library from the Ensemble based annotation library from Bioconductor.
 
-For model selection, penalised logistic regression models were selected
-as they allow output of a specific risk rather than a binary outcome,
-and it reduces issues associated with overfitting, thus solving the
-large p small n problem. Between ridge, lasso and elastic net , elastic
-net was selected as it shows the highest accuracy, a stable AUC, and
-small Brier score using cross validation.
+The three datasets were joined based on common gene symbols. To account
+for any technical differences in gene expression measurements between
+the three experiments, we perform quantile normalization. Quantile
+normalization is one of the most widely adopted preprocessing methods
+for analyzing microarray data. Quantile normalization reduces batch
+effect and removes technological noise by scaling the variables to have
+values between 0 and 1, ensuring the distribution of gene expressions
+from each array are the same. This allowed more robust predictions that
+can be generalised to different sequencing platforms (Qiu et.al, 2013).
 
-\hypertarget{output}{%
-\paragraph{1.3. Output}\label{output}}
+From the high dimension of gene expression data between stable and acute
+rejection patients, we performed feature selection using the `limma'
+function to identify and extract the top 100 significant genes of the
+kidney rejection dataset. These top 100 genes were used to build a
+comprehensive model that can predict an acute re
 
-In our product, the input raw counts will be transformed. If the data
-uses ENSEMBL ID, we converted them to official gene symbols. The output
-will be a colour coded gauge plot showing both percentage of the
-patient's risk and percentage of the population risk of acute rejection.
-This visualisation is clear and easy to understand which is suitable for
-our target audience.
+Function to read in the files, unzip them, place them into a table
 
-\hypertarget{limitations}{%
-\paragraph{1.4. Limitations}\label{limitations}}
+Preprocess data in the GSE Raw folder into a table, save it as a txt
+file
 
-If the input doesn't include the same genes in the model, a new model
-will be trained on the spot. However this creates a limitation of the
-long computational time.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gse_}\DecValTok{396}\NormalTok{ =}\StringTok{ }\KeywordTok{preprocessing_fn}\NormalTok{(}\StringTok{"../data/GSE120396_RAW/"}\NormalTok{)}
+\KeywordTok{write.csv}\NormalTok{(gse_}\DecValTok{396}\NormalTok{, }\StringTok{"GSE120396_expression_matrix.txt"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{estimating-time-to-de-novo-dsa-presence}{%
-\subsubsection{2. Estimating Time to de novo DSA
-Presence}\label{estimating-time-to-de-novo-dsa-presence}}
+Install the Ensembl based annotation library from Bioconductor Function
+takes a GSE table as input, and returns a GSE dataframe with two new
+columns, `gene symbols' and `gene ids', from the `ensembl ids' using the
+library above.
 
-Survival curve (from `Donor Mismatches' tab) is based on data provided
-by Dr.~Germain Wong. Here we use the data provided by dr Germaine wong
-to calculate an estimate predicting the outcome of a graft based on the
-recipient's phenotypic information.
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(}\StringTok{"EnsDb.Hsapiens.v79"}\NormalTok{)}
 
-We will then estimate the probability until donor specific antibodies
-arise for the patient phenotype, based upon potential numbers of eplet
-mismatches they could have with donor kidneys. DSA presence has been
-found to be associated with many forms of rejection and graft failure.
+\NormalTok{emsembl_to_symbol <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(gse) \{}
+\NormalTok{    G_list <-}\StringTok{ }\KeywordTok{select}\NormalTok{(EnsDb.Hsapiens.v79, }
+        \DataTypeTok{key =} \KeywordTok{rownames}\NormalTok{(gse), }
+        \DataTypeTok{columns =} \KeywordTok{c}\NormalTok{(}\StringTok{"SYMBOL"}\NormalTok{), }
+        \DataTypeTok{keytype =} \StringTok{"GENEID"}\NormalTok{)}
+\NormalTok{    df =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(gse)}
+\NormalTok{    df_symbol <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(df, }
+\NormalTok{        G_list, }\DataTypeTok{by.x =} \DecValTok{0}\NormalTok{, }
+        \DataTypeTok{by.y =} \StringTok{"GENEID"}\NormalTok{, }
+        \DataTypeTok{all.x =} \OtherTok{TRUE}\NormalTok{)}
+    \KeywordTok{return}\NormalTok{(df_symbol)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
 
-Eplets are small arrangements of amino acid residues that are
-polymorphic. That is they occur in several different forms on Human
-Leukocyte antigen (HLA) molecules. Eplets are essential components of
-HLA epitopes (part of an antigen molecule where an antibody attaches
-itself) that are recognised by the antibodies
+Log the two datasets, 649 and 179, and use the ensembl function to get
+the gene symbols for both datasets. Finally, merge the datasets by gene
+symbols.
 
-HLA (Human Leukocyte antigen) are cell surface proteins, responsible for
-regulating the immune system in humans. They are important in graft
-rejection: where any cell displaying some other HLA type is seen as an
-invader by the body's immune system = rejection of the tissue that bears
-those cells.
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# log 649!}
+\NormalTok{log_}\DecValTok{649}\NormalTok{ <-}\StringTok{ }\KeywordTok{log2}\NormalTok{(gse_}\DecValTok{649}\NormalTok{)}
+\NormalTok{log_}\DecValTok{649}\NormalTok{[log_}\DecValTok{649} \OperatorTok{==}\StringTok{ }\OperatorTok{-}\OtherTok{Inf}\NormalTok{] <-}\StringTok{ }\DecValTok{0}
+\NormalTok{df_}\DecValTok{649}\NormalTok{_symbol =}\StringTok{ }\KeywordTok{emsembl_to_symbol}\NormalTok{(log_}\DecValTok{649}\NormalTok{)}
 
-\hypertarget{data-cleaning-and-processing-1}{%
-\paragraph{2.1. Data cleaning and
-processing}\label{data-cleaning-and-processing-1}}
+\CommentTok{# 179!}
+\NormalTok{log_}\DecValTok{179}\NormalTok{ <-}\StringTok{ }\KeywordTok{log2}\NormalTok{(gse_}\DecValTok{179}\NormalTok{)}
+\NormalTok{log_}\DecValTok{179}\NormalTok{[log_}\DecValTok{179} \OperatorTok{==}\StringTok{ }\OperatorTok{-}\OtherTok{Inf}\NormalTok{] <-}\StringTok{ }\DecValTok{0}
+\NormalTok{df_}\DecValTok{179}\NormalTok{_symbol =}\StringTok{ }\KeywordTok{emsembl_to_symbol}\NormalTok{(log_}\DecValTok{179}\NormalTok{)}
 
-Based on a study by Dayoub et al.~in 2018 we choose age and gender as
-phenotypic predictors for graft survival. Here we first create a
-survival object using presence or absence of class 2 de nova DSA's and
-the number of days for it to form, which is our dependent variable for
-our Kaplan Meier curve. here we focused on DSA as its an established
-biomarker for predicting antibody-mediated rejection which in turn is
-the leading cause of graft loss
+\CommentTok{# left join both}
+\NormalTok{df_both <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(df_}\DecValTok{179}\NormalTok{_symbol, }
+\NormalTok{    df_}\DecValTok{649}\NormalTok{_symbol, }\DataTypeTok{by.x =} \StringTok{"Row.names"}\NormalTok{, }
+    \DataTypeTok{by.y =} \StringTok{"Row.names"}\NormalTok{, }
+    \DataTypeTok{all.x =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{df_both}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{output-1}{%
-\paragraph{2.2. Output}\label{output-1}}
+We plot the distribution of patient gene expression measurements using a
+boxplot to see if we have to remove any patient that has measurements
+unlike the others.
 
-The output is a plot estimating the survival probability of a graft
-based on the patient's age and gender. As the patient would not know the
-proportion of mismatches he/she would have with a particular donor we
-stratified the mismatches based on the mean number of mismatches in the
-provided data which was 30. This gives the practitioner and the patient
-a better idea of what to expect based on what the previous patient with
-similar characteristics experienced. Ideally, this can be used in
-resource allocation and prescribing medication. Just to highlight, this
-is not used as a predictor of graft survival but only a guide.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{melt}\NormalTok{(gse_}\DecValTok{396}\NormalTok{), }
+    \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Var2, }\DataTypeTok{y =}\NormalTok{ value)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.colour =} \StringTok{"black"}\NormalTok{, }
+        \DataTypeTok{outlier.shape =} \DecValTok{16}\NormalTok{, }
+        \DataTypeTok{outlier.size =} \FloatTok{0.5}\NormalTok{, }
+        \DataTypeTok{notch =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }
+        \DataTypeTok{hjust =} \DecValTok{1}\NormalTok{)) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"patient"}\NormalTok{, }
+        \DataTypeTok{y =} \StringTok{"expression value"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\NormalTok{p}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{limitations-1}{%
-\paragraph{2.3. Limitations}\label{limitations-1}}
+\hypertarget{part-2.-estimating-time-to-de-novo-dsa-presence}{%
+\paragraph{Part 2. Estimating Time to de novo DSA
+Presence}\label{part-2.-estimating-time-to-de-novo-dsa-presence}}
 
-The main issue was the size of the data set is small. (only 198
-entries). So when we stratify it further based on age, gender, and
-mismatches we end up with little information for each subgroup.
-therefore we don't have enough data to represent the entire
-subpopulation fairly, meaning that some curves are uninformative.
+The data and data dictionary used were provided by Dr.~Jermaine wong.
 
-\hypertarget{predicting-operational-tolerance}{%
-\subsubsection{3. Predicting Operational
-Tolerance}\label{predicting-operational-tolerance}}
+Certain columns in the data were mutated as follows. 0 and 1 variables
+in the Sex\_Cat columns were mapped to FEmale and Male respectively. The
+values in the agetxn columns were rounded and grouped into 3 categories
+`25-35','36-45', and `46-55'. C2epletMM were also grouped into
+categories,'\textless{}= 30 MM' and ` \textgreater{} = 30MM'.
 
-A way to minimise graft dysfunction is for the patient to take
-immunosuppressive drugs, which as a consequence could increase their
-risk of contracting diseases. However, some rare patients are found to
-be operationally tolerant, which means that they still maintain stable
-graft function after removal of these drugs. Hence, our final part will
-be assessing the patient's reliance on immune suppression, which can
-help with prescription making for the practitioner.
+Here we first create a survival object using the Surv() function, to
+which we feed in the ``C2dnDSA'', ``C2daystodnDSA'' information, which
+in turn is used as the dependent variable for the Kaplan-Meier Formula.
+The data set is filtered by the selected user input(Age group and
+Gender) and passed in as the Independent variable. We plot the Kaplan
+Meier Curve using the survfit() function.
 
-\hypertarget{data-cleaning-and-processing-2}{%
-\paragraph{3.1. Data cleaning and
-processing}\label{data-cleaning-and-processing-2}}
+Based on previous research studies conducted it was found that there was
+no significant correlation between BMI category and graft survival
+(Papalia et.al, 2010) Thus we focused on only using age and gender as
+phenotypic information when stratifying the data to fit a particular
+recipient.
 
-To predict operational tolerance, we collected a dataset that contained
-raw gene expressions from tolerant patients, and normal patients which
-still required immune suppression for graft function. After quantile
-normalisation and batch effect removal, we performed feature selection.
-Firstly, genes with noticeable counts in at least one groups was
-retained by using the edgeR package. We then selected the most
-differentially expressed genes between the two groups using multiple
-t-tests. Finally, a review by Massart et al. (2017) suggested a
-collection of genes that were highly differential between tolerant and
-normal patients, and so these were also added to our final training
-dataset.
+\hypertarget{part-3.-predicting-operational-tolerance}{%
+\paragraph{Part 3. Predicting Operational
+Tolerance}\label{part-3.-predicting-operational-tolerance}}
 
-\hypertarget{selecting-a-model-1}{%
-\paragraph{3.2. Selecting a Model}\label{selecting-a-model-1}}
+To predict operational tolerance, we collected the GSE22229 dataset that
+contained raw gene expressions from tolerant patients and normal
+patients (which still required immune suppression for stable graft
+function). GSE22229 dataset was a raw CEL dataset containing 58 zipped
+files, each pertaining to the gene expression for one patient that was
+either tolerant (19), undergoing normal immunosuppression (27), or
+standard controls (12). In this case, we only retained the tolerant and
+immunosuppressed patients for our analysis.
 
-Similar to part 1, we performed penalised logistic regression models to
-account for possible overfitting in a large p small n situation. Elastic
-net once again proved to be a better model than Ridge and LASSO, showing
-higher accuracies and AUC after repeated cross-validation.
+CEL files are data files created by the Affymetrix DNA microarray image
+analysis software, and contain estimated probe (sequence of DNA base
+pairs) intensity values extracted from biological chips called
+Affymetrix Genechips. Each probe was mapped to a specific gene symbol
+using the GPL570 Chip Description File (CDF).
 
-\hypertarget{output-2}{%
-\paragraph{3.3. Output}\label{output-2}}
+Since the data is in the newer Affymetrix Arrays format (Gene ST
+arrays), we utilised the `oligo' library and its functions,
+`list.celfiles' and `read.celfiles', to read a list of CEL files into
+our directory. This list was then converted from an AffyBatch object
+into an ExpressionSet (i.e.~gene expression) using the `rma' function
+from the `pd.mogene.2.0.st' library. The `rma' function, short for
+Robust Multichip Average, also simultaneously log2 transforms and
+normalises the gene expressions.
 
-The output is a simple colour coded gauge plot showing both percentage
-of the patient's reliance and percentage of the population requiring
-immunosuppression, making it suitable for our target audience.
+After converting our ExpressionSet object into a dataframe, we then
+investigated the gene expression distribution amongst patients using a
+boxplot to ensure that the data has been normalised and can be used for
+further processing.
 
-\hypertarget{limitations-2}{%
-\paragraph{3.4. Limitations}\label{limitations-2}}
+The boxplot above demonstrates strong similarity in gene expression
+between patients and so our dataframe can be further analysed without
+concern of batch effects between sample measurements.
 
-However, since operational tolerance is rare, only a handful of data
-samples are available, making it difficult to diagnose. Also, like Part
-1, another limitation of the model is it has to be `retrained' for if
-the input does not contain the same genes in the model.
+After quantile normalization and batch effect removal, we performed
+feature selection. Firstly, genes that were lowly expressed in both
+groups were removed by using the filterByExpr() function from the edgeR
+package; these genes do not provide much biological meaning and removing
+them allows for less statistical tests to be performed, as well as
+allowing greater reliability in observing the variance between different
+groups (Law et al., 2018).
+
+We then selected the top 100 most differentially expressed genes between
+the two groups using multiple t-tests from the \texttt{limma} package.
+Finally, a review by Massart et al. (2017) suggested a collection of
+genes that were highly differential between tolerant and normal
+patients, and so these were also added to our final training dataset (if
+they weren't already filtered for previously).
+
+Installing essential tac packages
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(limma)}
+\KeywordTok{library}\NormalTok{(affy)}
+\KeywordTok{library}\NormalTok{(oligo)}
+\KeywordTok{library}\NormalTok{(pd.mogene.}\DecValTok{2}\NormalTok{.}\FloatTok{0.}\NormalTok{st)}
+\KeywordTok{library}\NormalTok{(mogene20sttranscriptcluster.db)}
+\KeywordTok{library}\NormalTok{(GEOquery)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"data/GSE22229_RAW/"}\NormalTok{)}
+\NormalTok{celFiles <-}\StringTok{ }\KeywordTok{list.celfiles}\NormalTok{()}
+\NormalTok{affyRaw <-}\StringTok{ }\KeywordTok{read.celfiles}\NormalTok{(celFiles)}
+\NormalTok{eset <-}\StringTok{ }\KeywordTok{rma}\NormalTok{(affyRaw)}
+
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"../../"}\NormalTok{)}
+\KeywordTok{write.exprs}\NormalTok{(eset, }\DataTypeTok{file =} \StringTok{"tolerance.txt"}\NormalTok{)}
+\NormalTok{my_frame <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{exprs}\NormalTok{(eset))}
+\KeywordTok{write.table}\NormalTok{(my_frame, }
+    \DataTypeTok{file =} \StringTok{"tolerance.txt"}\NormalTok{, }
+    \DataTypeTok{sep =} \StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{evaluation-strategies}{%
+\subsubsection{Evaluation Strategies}\label{evaluation-strategies}}
+
+We decided to implement penalised logistic regression methods when
+creating a predictive model for Part 1 and Part 3 of our risk
+calculator. Logistic regression was utilised as it provides a
+probabilistic output for a specific risk, which may be more informative
+than a binary outcome. Furthermore, the penalised nature of some methods
+(e.g.~Ridge, LASSO, Elastic Net) can address the overfitting or
+multicollinearity issue prevalent in large p, small n situations
+prevalent in gene expression data.
+
+For Part 1 and Part 3 respectively, our model was trained using a
+50-repeated 5-fold cross validation (CV) procedure. The performance of
+our model in predicting the CV test-set under Ridge, LASSO and Elastic
+Net methods were evaluated using three primary metrics: accuracy, AUC
+and the Brier Score.
+
+In the case of class imbalance within the training dataset, the accuracy
+metric may suggest an inflated performance. As such, the AUC and Brier
+Score were also calculated.
+
+\begin{itemize}
+\item
+  The AUC is a more robust metric with less bias to class size. Briefly,
+  it can be thought of as the probability that a true-positive sample
+  (e.g.~AR patient) has a greater predicted risk than true-negative
+  samples (e.g.~normal patient).
+\item
+  The Brier Score meanwhile complements the AUC by checking that the
+  predicted risk of a sample is actually similar to the true value. For
+  example, in a true-positive case (i.e.~label = 1) with a predicted
+  risk of 0.8, the Brier Score quantitatively measures how close the 0.8
+  value is to 1. Better predictions are reflected as a lower Brier
+  Score.
+\end{itemize}
+
+To select our final models for Part 1 and Part 3 respectively, we
+quantitatively compared the accuracy, AUC and Brier Score from different
+penalised models (Ridge, LASSO, and Elastic Net) using boxplot
+visualisations.
+
+We also evaluate the model based on robustness. Robustness refers to how
+well the model achieves its aim when it is applied to the general
+population, which is our target audience. We qualitatively analysed
+robustness by estimating how well the model will adjust if it is applied
+to real-world data, which may have potential issues such as missing
+information.This evaluation metric ensures the external validity of the
+product.
+
+\hypertarget{results}{%
+\subsection{Results}\label{results}}
+
+\hypertarget{final-model}{%
+\subsubsection{Final Model}\label{final-model}}
+
+\hypertarget{deployment-process}{%
+\subsubsection{Deployment Process}\label{deployment-process}}
+
+\hypertarget{discussion-and-conclusion}{%
+\subsection{Discussion and Conclusion}\label{discussion-and-conclusion}}
+
+\hypertarget{potential-shortcomings}{%
+\subsubsection{Potential shortcomings}\label{potential-shortcomings}}
+
+\hypertarget{future-work-and-improvements}{%
+\subsubsection{Future work and
+improvements}\label{future-work-and-improvements}}
 
 \hypertarget{conclusion}{%
-\subsection{Conclusion}\label{conclusion}}
-
-In conclusion, using the Shared decision-making approach for our risk
-calculator, we hope both the practitioner and patient are able to make
-informed decisions and derive the optimal treatment option. This
-includes allocating reliable donor kidneys to the patient and
-prescribing the correct dosage of immunosuppressive drugs. In terms of
-future work, we need more diverse and larger datasets to account for
-variation and possible confounders within the population, and also
-increase confidence. For example, the eplet data is made up of mostly
-Caucasian patients only. Ultimately, shared decision making should be
-implemented more widely within organ transplantation.
+\subsubsection{Conclusion}\label{conclusion}}
 
 \newpage
 
@@ -345,14 +485,28 @@ Appearance
 
 Penalised Logistic Regression: Risk of Acute Rejection
 
-\begin{center}\includegraphics{Executive_Report_files/figure-latex/AR-1} \end{center}
-
 \hypertarget{appendix-c}{%
 \subsubsection{Appendix C}\label{appendix-c}}
 
 Penalised Logistic Regression: Reliance on Immunosuppression
 
-\begin{center}\includegraphics{Executive_Report_files/figure-latex/immuno-1} \end{center}
+\hypertarget{contribution-statement}{%
+\subsection{Contribution Statement}\label{contribution-statement}}
+
+\hypertarget{johanna-jones}{%
+\subsubsection{Johanna Jones}\label{johanna-jones}}
+
+\hypertarget{andrew-auwyang}{%
+\subsubsection{Andrew Auwyang}\label{andrew-auwyang}}
+
+\hypertarget{eva-pu}{%
+\subsubsection{Eva Pu}\label{eva-pu}}
+
+\hypertarget{niruth-bogahawatta}{%
+\subsubsection{Niruth Bogahawatta}\label{niruth-bogahawatta}}
+
+\hypertarget{alex-wong}{%
+\subsubsection{Alex Wong}\label{alex-wong}}
 
 %\showmatmethods
 
