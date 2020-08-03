@@ -3,7 +3,7 @@ Kidney Transplant Risk Calculator
 
 Task
 -------------------
-- DATA3888 Capstone Project Shiny App Only
+- DATA3888 Capstone Project **Shiny App Only**
 - [Report repo](https://github.sydney.edu.au/awon6941/DATA3888-Project-Report "Report repo")
 - Mar 2020 - May 2020
 
