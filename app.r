@@ -37,17 +37,14 @@ library(EnsDb.Hsapiens.v79)
 options(repos = BiocManager::repositories())
 
 
-survdt_m = readRDS("survdt_m.rds")
-
-load("elastic.glm.v4.Rdata")
-load("backup_model_v2.Rdata")
-load("100_genes.rdata")
-
-immune_elastic = readRDS("elastic_model_immune.RDS")
-train_immune = readRDS("immune_gene_final_edit.RDS")
-immune_status = readRDS("immune_status.rds")
-edited_immune_elastic = readRDS("edited_elastic_model_immune.RDS")
-
+load("rdata/elastic.glm.v4.Rdata")
+load("rdata/backup_model_v2.Rdata")
+load("rdata/100_genes.rdata")
+survdt_m = readRDS("rds/survdt_m.rds")
+immune_elastic = readRDS("rds/elastic_model_immune.RDS")
+train_immune = readRDS("rds/immune_gene_final_edit.RDS")
+immune_status = readRDS("rds/immune_status.rds")
+edited_immune_elastic = readRDS("rds/edited_elastic_model_immune.RDS")
 
 
 ui <- dashboardPage(dashboardHeader(title = "DATA3888 Group 24"),
